@@ -8,8 +8,8 @@ class Game
         @correct_place = 0
         display_board()
         play()
-
     end
+    
     def display_board()
         clear()
         if @correct_code
@@ -22,6 +22,7 @@ class Game
         @turns_left.times { puts " #  #  #  # " }
         @attempts.each { |arr| puts " #{arr[0]}  #{arr[1]}  #{arr[2]}  #{arr[3]}  Correct num #{@correct_num}   Correct place #{@correct_place}"}
     end
+
     def play()
         while !@correct_code
             display_board()
@@ -37,9 +38,14 @@ class Game
         while !correct_input
             input_array = []
             num_array = []
-            puts "Guess code. Num 1 through 8"
-            guess = gets.chomp.delete(' ').to_i
-            input_array = guess.to_s.split("")
+            puts "Guess code 4 numbers. Num 1 through 8. q to quit."
+            input = gets.chomp
+            if input == "q" 
+                @correct_code = true
+                break
+            end
+            input = input.delete(' ').to_i
+            input_array = input.to_s.split("")
             input_array.each { |num| num_array.push(num.to_i) }
             if input_array.length == 4
                 correct_input = num_array.all? { |num| num.between?(1,8) }
@@ -84,7 +90,11 @@ class Game
     end
     def display_winner()
         display_board()
-        puts "Wins"
+        if @correct_place == 4
+            puts "Wins"
+        else
+            puts "Quit"
+        end
     end
 end
 
