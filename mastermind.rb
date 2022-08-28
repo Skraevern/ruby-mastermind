@@ -13,11 +13,12 @@ class Game
     def display_board()
         clear()
         if @correct_code
-            puts "#{@code}" 
+            puts "#{@code.secret_code}" 
         else
             ##puts ""
-            puts "#{@code}"
+            puts "#{@code.secret_code}"
         end
+        puts "#{@code.duplicate_numbers}"
         @turns_left.times { puts " #  #  #  # " }
         @attempts.each { |arr| puts " #{arr[0]}  #{arr[1]}  #{arr[2]}  #{arr[3]}  Correct num #{@correct_num}   Correct place #{@correct_place}"}
     end
@@ -52,20 +53,29 @@ class Game
         @correct_num = 0
         @correct_place = 0
         code_to_check = @attempts[0]
+        duplicate_numbers_temp = @code.duplicate_numbers
         
-        if code_to_check == @code
+        if code_to_check == @code.secret_code
             display_board()
             @correct_num = 4
             @correct_place = 4
             @correct_code = true
         else
-            @code.each { |code_num| code_to_check.each { |check_num| 
+            @code.secret_code.each { |code_num| code_to_check.each { |check_num| 
                 if code_num == check_num
-                    @correct_num = @correct_num + 1
+                    # check number of duplicates [[num, times], [num, times]] to get correct correct_num
+                    duplicate_numbers_temp.each_with_index { |arr| 
+                        if arr[0] == code_num 
+                            if arr[1] > 0
+                                @correct_num = @correct_num + 1
+                                arr[1] = arr[1] - 1
+                            end
+                        end
+                    }
                 end    
             }}
-            @code.each_with_index { |code_num, i | 
-                if @code[i] == code_to_check[i]
+            @code.secret_code.each_with_index { |code_num, i | 
+                if @code.secret_code[i] == code_to_check[i]
                     @correct_place = @correct_place + 1
                 end
             }
@@ -79,14 +89,17 @@ class Game
 end
 
 class Code
-    attr_accessor :secret_code
+    attr_accessor :secret_code, :duplicate_numbers
     def initialize()
         @secret_code = []
+        @duplicate_numbers = [] #[[num, times], [num, times]]
         add_random_code()
     end
     def add_random_code()
         4.times { @secret_code.push(rand(1..8)) }
         puts "#{@secret_code}"
+        @duplicate_numbers = @secret_code.group_by{|i| i}.map{|k,v| [k, v.count] }
+        puts "#{@duplicate_numbers}"
     end
 end
 def clear()
@@ -94,4 +107,4 @@ def clear()
 end
 clear()
 code = Code.new()
-game = Game.new(code.secret_code)
+game = Game.new(code)
