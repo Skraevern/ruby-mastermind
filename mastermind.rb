@@ -6,21 +6,35 @@ class Game
         @correct_code = false
         @correct_num = 0
         @correct_place = 0
+
         display_board()
         play()
     end
-    
+
     def display_board()
         clear()
         if @correct_code
-            puts "#{@code.secret_code}" 
+            print "["
+            @code.secret_code.each_with_index {|x, i| print " #{@code.secret_code[i]} " }
+            print "]"
+            print "\n" 
+        elsif @code.revealed_numbers.any? { |bool| bool == true }
+            print "["
+            @code.revealed_numbers.each_with_index { | bool, i|
+                if @code.revealed_numbers[i] == true
+                    print " #{@code.secret_code[i]} "
+                else
+                    print " X "
+                end
+                }
+            print "]"
+            print "\n"
         else
-            ##puts ""
-            puts "#{@code.secret_code}"
+            puts "[ X  X  X  X ]"
         end
-        puts "#{@code.duplicate_numbers}"
-        @turns_left.times { puts " #  #  #  # " }
-        @attempts.each { |arr| puts " #{arr[0]}  #{arr[1]}  #{arr[2]}  #{arr[3]}  Correct num #{@correct_num}   Correct place #{@correct_place}"}
+
+        @turns_left.times { puts "  #  #  #  # " }
+        @attempts.each { |arr| puts "  #{arr[0]}  #{arr[1]}  #{arr[2]}  #{arr[3]}  Correct num #{@correct_num}   Correct place #{@correct_place}"}
     end
 
     def play()
@@ -38,11 +52,21 @@ class Game
         while !correct_input
             input_array = []
             num_array = []
-            puts "Guess code 4 numbers. Num 1 through 8. q to quit."
+            puts "Guess code with 4 numbers. Num 1 through 8.\n´q´ to quit. ´h´ to reveal one number."
             input = gets.chomp
             if input == "q" 
                 @correct_code = true
                 break
+            end
+            if input == "h"
+                @code.revealed_numbers.each_with_index { |bool, i|
+                if bool == false
+                    @code.revealed_numbers[i] = true
+                    puts "#{@code.revealed_numbers}"
+                    display_board()
+                    break
+                end
+                }
             end
             input = input.delete(' ').to_i
             input_array = input.to_s.split("")
@@ -99,17 +123,17 @@ class Game
 end
 
 class Code
-    attr_accessor :secret_code, :duplicate_numbers
+    attr_accessor :secret_code, :duplicate_numbers, :revealed_numbers
     def initialize()
         @secret_code = []
         @duplicate_numbers = [] #[[num, times], [num, times]]
+        @revealed_numbers = [false, false, false, false]
         add_random_code()
     end
     def add_random_code()
         4.times { @secret_code.push(rand(1..8)) }
         puts "#{@secret_code}"
         @duplicate_numbers = @secret_code.group_by{|i| i}.map{|k,v| [k, v.count] }
-        puts "#{@duplicate_numbers}"
     end
 end
 def clear()
