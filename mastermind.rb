@@ -6,6 +6,8 @@ class Game
         @correct_code = false
         @correct_num = 0
         @correct_place = 0
+        @correct_guess_arr = [[0, 0]]
+        @correct_guess_index = 0
 
         display_board()
         play()
@@ -34,7 +36,7 @@ class Game
         end
 
         @turns_left.times { puts "  #  #  #  # " }
-        @attempts.each { |arr| puts "  #{arr[0]}  #{arr[1]}  #{arr[2]}  #{arr[3]}  Correct num #{@correct_num}   Correct place #{@correct_place}"}
+        @attempts.each { |arr| puts "  #{arr[0]}  #{arr[1]}  #{arr[2]}  #{arr[3]}  Correct num #{@correct_guess_arr[@correct_guess_index]}   Correct place #{@correct_guess_arr[@correct_guess_index]}"}
     end
 
     def play()
@@ -82,6 +84,7 @@ class Game
     def check_right_code
         @correct_num = 0
         @correct_place = 0
+        correct_arr_tmp = [0, 0]
         code_to_check = @attempts[0]
         duplicate_numbers_temp = @code.duplicate_numbers
         
@@ -91,26 +94,27 @@ class Game
             @correct_place = 4
             @correct_code = true
         else
+            @code.secret_code.each_with_index { |code_num, i | 
+                if @code.secret_code[i] == code_to_check[i]
+                    correct_arr_tmp[0] = correct_arr_tmp[0] + 1
+                end
+            }
             @code.secret_code.each { |code_num| code_to_check.each { |check_num| 
                 if code_num == check_num
                     # check number of duplicates [[num, times], [num, times]] to get correct correct_num
                     duplicate_numbers_temp.each_with_index { |arr| 
                         if arr[0] == code_num 
                             if arr[1] > 0
-                                @correct_num = @correct_num + 1
+                                correct_arr_tmp[1] = correct_arr_tmp[1] + 1
                                 arr[1] = arr[1] - 1
                             end
                         end
                     }
                 end    
             }}
-            @code.secret_code.each_with_index { |code_num, i | 
-                if @code.secret_code[i] == code_to_check[i]
-                    @correct_place = @correct_place + 1
-                end
-            }
         end
-
+        @correct_guess_index = @correct_guess_index + 1
+        @correct_guess_arr.push(duplicate_numbers_temp)
     end
     def display_winner()
         display_board()
